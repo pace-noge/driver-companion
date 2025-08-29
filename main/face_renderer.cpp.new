@@ -1,0 +1,117 @@
+#include "face_renderer.h"
+#include <math.h>
+
+// LVGL canvas buffer for drawing
+static lv_color_t canvas_buf[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+
+FaceRenderer::FaceRenderer(DisplayManager* display) : display(display) {
+    // Create a canvas for drawing
+    canvas = lv_canvas_create(display->getScreen());
+    lv_canvas_set_buffer(canvas, canvas_buf, DISPLAY_WIDTH, DISPLAY_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    lv_obj_center(canvas);
+    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+}
+
+void FaceRenderer::drawEye(int x, int y, EyeState state) {
+    if (state == EYE_OPEN) {
+        // Draw open eye with LVGL
+        lv_draw_rect_dsc_t rect_dsc;
+        lv_draw_rect_dsc_init(&rect_dsc);
+        rect_dsc.bg_color = lv_color_white();
+        rect_dsc.radius = EYE_HEIGHT / 2;
+        
+        lv_canvas_draw_rect(canvas, x - EYE_WIDTH/2, y - EYE_HEIGHT/2, 
+                           EYE_WIDTH, EYE_HEIGHT, &rect_dsc);
+    } else {
+        // Draw closed eye with LVGL
+        lv_draw_line_dsc_t line_dsc;
+        lv_draw_line_dsc_init(&line_dsc);
+        line_dsc.color = lv_color_white();
+        line_dsc.width = 2;
+        
+        lv_canvas_draw_line(canvas, x - EYE_WIDTH/2, y, 
+                           x + EYE_WIDTH/2, y, &line_dsc);
+    }
+}
+
+void FaceRenderer::drawEyes(EyeState left, EyeState right) {
+    drawEye(LEFT_EYE_X, EYE_Y, left);
+    drawEye(RIGHT_EYE_X, EYE_Y, right);
+}
+
+void FaceRenderer::drawMouth(MouthShape shape) {
+    lv_draw_line_dsc_t line_dsc;
+    lv_draw_line_dsc_init(&line_dsc);
+    line_dsc.color = lv_color_white();
+    line_dsc.width = 2;
+    
+    lv_draw_arc_dsc_t arc_dsc;
+    lv_draw_arc_dsc_init(&arc_dsc);
+    arc_dsc.color = lv_color_white();
+    arc_dsc.width = 2;
+    
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.border_color = lv_color_white();
+    rect_dsc.border_width = 2;
+    rect_dsc.bg_opa = LV_OPA_TRANSP;
+
+    switch (shape) {
+        case MOUTH_SMILE:
+            // Draw smile arc
+            lv_canvas_draw_arc(canvas, MOUTH_X, MOUTH_Y, MOUTH_WIDTH, 0, 180, &arc_dsc);
+            break;
+        case MOUTH_NEUTRAL:
+            // Draw neutral line
+            lv_canvas_draw_line(canvas, MOUTH_X - MOUTH_WIDTH/2, MOUTH_Y, 
+                               MOUTH_X + MOUTH_WIDTH/2, MOUTH_Y, &line_dsc);
+            break;
+        case MOUTH_FROWN:
+            // Draw frown arc
+            lv_canvas_draw_arc(canvas, MOUTH_X, MOUTH_Y, MOUTH_WIDTH, 180, 360, &arc_dsc);
+            break;
+        case MOUTH_WIDE:
+            // Draw wide mouth rectangle
+            lv_canvas_draw_rect(canvas, MOUTH_X - 10, MOUTH_Y - 5, 20, 10, &rect_dsc);
+            break;
+    }
+}
+
+void FaceRenderer::drawFace(FaceEmotion emotion) {
+    // Clear canvas
+    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+
+    EyeState leftEye = EYE_OPEN;
+    EyeState rightEye = EYE_OPEN;
+    MouthShape mouth = MOUTH_NEUTRAL;
+
+    switch (emotion) {
+        case EMOTION_HAPPY:
+            mouth = MOUTH_SMILE;
+            break;
+        case EMOTION_SAD:
+            leftEye = EYE_CLOSED;
+            rightEye = EYE_CLOSED;
+            mouth = MOUTH_FROWN;
+            break;
+        case EMOTION_ANGRY:
+            leftEye = EYE_CLOSED;
+            rightEye = EYE_CLOSED;
+            mouth = MOUTH_FROWN;
+            break;
+        case EMOTION_SURPRISED:
+            mouth = MOUTH_WIDE;
+            break;
+        case EMOTION_SLEEPY:
+            leftEye = EYE_CLOSED;
+            rightEye = EYE_CLOSED;
+            break;
+        case EMOTION_NEUTRAL:
+        default:
+            // Default state is already set
+            break;
+    }
+
+    drawEyes(leftEye, rightEye);
+    drawMouth(mouth);
+}

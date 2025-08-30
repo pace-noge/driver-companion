@@ -8,11 +8,16 @@ public:
     bool init();
     void clear();
     void update();
+    void fadeIn();
+    void fadeOut();
 
     lv_disp_t* getDisplay() const { return disp; }
-    lv_obj_t* getScreen() const { return lv_scr_act(); }
 
 private:
     lv_disp_t* disp;
+    lv_obj_t* fade_overlay;  // Black overlay for fade effect
+
+    static void fadeAnimCallback(void* var, int32_t v);
 };
+
 #endif

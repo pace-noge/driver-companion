@@ -50,7 +50,7 @@ bool OTAUpdater::performUpdate(const char* firmwareUrl) {
         lv_obj_add_style(success_label, &style, 0);
         
         display.update();
-        delay(2000);
+    vTaskDelay(pdMS_TO_TICKS(2000));
         esp_restart();
     } else {
         display.clear();
@@ -62,7 +62,7 @@ bool OTAUpdater::performUpdate(const char* firmwareUrl) {
         lv_obj_add_style(fail_label, &style, 0);
         
         display.update();
-        delay(3000);
+    vTaskDelay(pdMS_TO_TICKS(3000));
     }
     return false;
 }

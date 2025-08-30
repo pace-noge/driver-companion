@@ -35,9 +35,9 @@ void WiFiManager::disconnect() {
 }
 
 bool WiFiManager::waitForConnection(int timeoutMs) {
-    unsigned long start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < timeoutMs) {
-        delay(200);
+    unsigned long start = xTaskGetTickCount() * portTICK_PERIOD_MS;
+    while (WiFi.status() != WL_CONNECTED && (xTaskGetTickCount() * portTICK_PERIOD_MS - start) < (unsigned long)timeoutMs) {
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
     return WiFi.status() == WL_CONNECTED;
 }

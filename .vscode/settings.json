@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.embeddedhtml": "html",
-        "esp32-hal-adc.h": "c"
+        "esp32-hal-adc.h": "c",
+        "complex": "cpp"
     }
 }

@@ -30,11 +30,13 @@ bool DisplayManager::init() {
 
     // Initialize LVGL
     const lvgl_port_cfg_t port_cfg = {
-        .task_priority = 2
+        // .task_priority = 2,
+        // .task_stack_size = 8192,
+        // .task_core_id = 0
     };
     lvgl_port_init(&port_cfg);
 
-    // Add display using legacy LVGL port API for SSD1306 I2C
+    // Add display (only supported fields)
     const lvgl_port_display_cfg_t disp_cfg = {
         .buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT / 8,
         .double_buffer = false,
@@ -58,8 +60,21 @@ bool DisplayManager::init() {
         return false;
     }
 
-    // Set default font for the screen
-    lv_obj_set_style_text_font(lv_scr_act(), &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // Create fade overlay (invisible at first)
+    fade_overlay = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(fade_overlay, LV_HOR_RES, LV_VER_RES);
+    lv_obj_set_style_bg_color(fade_overlay, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(fade_overlay, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(fade_overlay, 0, LV_PART_MAIN);
+    lv_obj_set_style_radius(fade_overlay, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(fade_overlay, 0, LV_PART_MAIN);
+    lv_obj_move_to_index(fade_overlay, 9999);  // Bring to front
+
+    // Set default font
+    // lv_disp_set_default_font(disp, &lv_font_montserrat_14);
+    lv_disp_t* disp = lvgl_port_add_disp(&disp_cfg);
+    lv_disp_set_default(disp);
+
 
     // Clear screen
     clear();
@@ -74,4 +89,44 @@ void DisplayManager::clear() {
 
 void DisplayManager::update() {
     // LVGL handles refresh via lv_timer_handler()
+}
+
+void DisplayManager::fadeOut() {
+    if (!fade_overlay) return;
+
+    // Ensure overlay is visible and black
+    lv_obj_clear_flag(fade_overlay, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_bg_opa(fade_overlay, LV_OPA_TRANSP, LV_PART_MAIN);
+
+    // Create fade-out animation (0% → 100% opacity)
+    lv_anim_t anim;
+    lv_anim_init(&anim);
+    lv_anim_set_var(&anim, fade_overlay);
+    lv_anim_set_values(&anim, 0, 255);  // Transparent → Opaque
+    lv_anim_set_time(&anim, 300);
+    lv_anim_set_exec_cb(&anim, fadeAnimCallback);
+    lv_anim_set_path_cb(&anim, lv_anim_path_linear);
+    lv_anim_start(&anim);
+}
+
+void DisplayManager::fadeIn() {
+    if (!fade_overlay) return;
+
+    // Ensure overlay is fully opaque
+    lv_obj_set_style_bg_opa(fade_overlay, LV_OPA_COVER, LV_PART_MAIN);
+
+    // Create fade-in animation (100% → 0% opacity)
+    lv_anim_t anim;
+    lv_anim_init(&anim);
+    lv_anim_set_var(&anim, fade_overlay);
+    lv_anim_set_values(&anim, 255, 0);  // Opaque → Transparent
+    lv_anim_set_time(&anim, 300);
+    lv_anim_set_exec_cb(&anim, fadeAnimCallback);
+    lv_anim_set_path_cb(&anim, lv_anim_path_linear);
+    lv_anim_start(&anim);
+}
+
+void DisplayManager::fadeAnimCallback(void* var, int32_t v) {
+    lv_obj_t* obj = (lv_obj_t*)var;
+    lv_obj_set_style_bg_opa(obj, v, LV_PART_MAIN);
 }

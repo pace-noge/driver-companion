@@ -1,5 +1,8 @@
 #include "state_manager.h"
 #include <string.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 
 StateManager::StateManager(
     DisplayManager* display,
@@ -39,7 +42,7 @@ void StateManager::switchToMode(DisplayMode mode) {
 }
 
 void StateManager::update() {
-    unsigned long now = millis();
+    unsigned long now = xTaskGetTickCount() * portTICK_PERIOD_MS;
     if (navigationActive && now - navigationStartTime < NAVIGATION_DURATION_MS) {
         if (currentMode != DISPLAY_NAVIGATION) switchToMode(DISPLAY_NAVIGATION);
         return;
@@ -67,12 +70,12 @@ void StateManager::triggerNavigation(
     int laneCount
 ) {
     navigationActive = true;
-    navigationStartTime = millis();
+    navigationStartTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
     if (currentMode != DISPLAY_NAVIGATION) switchToMode(DISPLAY_NAVIGATION);
 }
 
 void StateManager::triggerGyroReaction() {
-    gyroStartTime = millis();
+    gyroStartTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
     if (currentMode != DISPLAY_GYRO_REACTION) switchToMode(DISPLAY_GYRO_REACTION);
 }
 
@@ -107,7 +110,7 @@ void StateManager::updateGyroReaction() {
 void StateManager::updateEmotion() {
     static unsigned long lastUpdate = 0;
     static int emotionState = 0;
-    if (millis() - lastUpdate > 3000) {
+    if (xTaskGetTickCount() * portTICK_PERIOD_MS - lastUpdate > 3000) {
         FaceEmotion emotion = EMOTION_NEUTRAL;
         switch (emotionState % 4) {
             case 0: emotion = EMOTION_HAPPY; break;
@@ -116,7 +119,7 @@ void StateManager::updateEmotion() {
             case 3: emotion = EMOTION_NEUTRAL; break;
         }
         emotionState++;
-        lastUpdate = millis();
+        lastUpdate = xTaskGetTickCount() * portTICK_PERIOD_MS;
         display->clear();
         face->drawFace(emotion);
         display->update();

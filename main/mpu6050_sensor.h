@@ -1,8 +1,10 @@
 #ifndef MPU6050_SENSOR_H
 #define MPU6050_SENSOR_H
 
-#include <Wire.h>
-#include <MPU6050_light.h>
+#include "driver/i2c.h"
+
+// Prepare for ESP-IDF native MPU6050 support
+// All MPU6050 register and I2C operations should use ESP-IDF I2C driver
 #include "secure_storage.h"
 
 enum MountOrientation {
@@ -28,7 +30,10 @@ public:
     void setOrientation(MountOrientation orientation);
 
 private:
-    MPU6050 mpu;
+    // Remove Arduino MPU6050 and Wire dependencies
+    // Add ESP-IDF I2C handle and MPU6050 register values
+    i2c_port_t i2c_port = I2C_NUM_0;
+    uint8_t mpu_addr = 0x68;
     unsigned long lastUpdate;
     float speedEstimate;
     float tiltX;
@@ -47,7 +52,7 @@ private:
     static constexpr const char* NVS_GYRO_Y = "mpu_gy";
     static constexpr const char* NVS_GYRO_Z = "mpu_gz";
     static constexpr const char* NVS_ORIENTATION = "mpu_orient";
-    byte detectAddress();
+    uint8_t detectAddress();
     void applyOrientation(float& ax, float& ay, float& az, float& gx, float& gy, float& gz);
     float lpf(float current, float previous, float alpha);
     static constexpr float LPF_ALPHA = 0.3f;

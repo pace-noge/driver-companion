@@ -18,8 +18,8 @@ EmotionEngine::EmotionEngine(
 
 void EmotionEngine::begin() {
     currentState = DRIVING_IDLE;
-    stateEnterTime = millis();
-    lastBlinkTime = millis() + random(BLINK_INTERVAL_MIN, BLINK_INTERVAL_MAX);
+    stateEnterTime = xTaskGetTickCount() * portTICK_PERIOD_MS;
+    lastBlinkTime = stateEnterTime + (rand() % (BLINK_INTERVAL_MAX - BLINK_INTERVAL_MIN) + BLINK_INTERVAL_MIN);
     leftBlink = true;
 }
 
@@ -34,7 +34,7 @@ void EmotionEngine::updateDrivingState() {
     float ax = sensor->getAccelX();
     float gz = sensor->getGyroZ();
     float speed = sensor->getSpeedEstimate();
-    unsigned long now = millis();
+    unsigned long now = xTaskGetTickCount() * portTICK_PERIOD_MS;
     unsigned long stateDuration = now - stateEnterTime;
 
     if (ax < BRAKE_THRESHOLD && currentState != DRIVING_HARD_BRAKE) {
@@ -101,9 +101,9 @@ void EmotionEngine::updateFacialExpression() {
 }
 
 void EmotionEngine::updateMicroExpressions() {
-    unsigned long now = millis();
+    unsigned long now = xTaskGetTickCount() * portTICK_PERIOD_MS;
     if (state->getCurrentMode() != DISPLAY_EMOTION && state->getCurrentMode() != DISPLAY_IDLE) return;
-    if (now - lastBlinkTime > random(BLINK_INTERVAL_MIN, BLINK_INTERVAL_MAX)) {
+    if (now - lastBlinkTime > (rand() % (BLINK_INTERVAL_MAX - BLINK_INTERVAL_MIN) + BLINK_INTERVAL_MIN)) {
         triggerBlink();
         lastBlinkTime = now;
     }
@@ -116,9 +116,8 @@ void EmotionEngine::triggerBlink() {
     face->drawEyes(left, right);
     face->drawMouth(MOUTH_NEUTRAL);
     display->update();
-    delay(150);
+    vTaskDelay(pdMS_TO_TICKS(150));
     face->drawEyes(EYE_OPEN, EYE_OPEN);
     face->drawMouth(MOUTH_NEUTRAL);
     display->update();
-}
 }

@@ -1,5 +1,5 @@
-set(COMPONENT_SRCS
-    "main.cpp"
+idf_component_register(
+    SRCS "main.cpp"
     "display_manager.cpp"
     "secure_storage.cpp"
     "ble_server.cpp"
@@ -10,13 +10,5 @@ set(COMPONENT_SRCS
     "arrow_renderer.cpp"
     "ota_updater.cpp"
     "wifi_manager.cpp"
+    INCLUDE_DIRS "."
 )
-
-set(COMPONENT_ADD_INCLUDEDIRS ".")
-
-set(COMPONENT_REQUIRES bt)
-
-# LVGL is added via component manager, so no need to declare here
-# It will be found via idf_component.yml
-
-register_component()

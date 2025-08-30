@@ -8,14 +8,7 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
-#include <esp_nimble_hci.h>
 #include "esp_bt.h"
-#include <nimble/nimble_port.h>
-#include "nimble/nimble_port_freertos.h"
-#include "host/util/util.h"
-#include "host/ble_hs.h"
-#include "services/gap/ble_svc_gap.h"
-#include "services/gatt/ble_svc_gatt.h"
 #include <string.h>
 
 nvs_handle_t SecureStorage::handle = 0;
@@ -24,7 +17,7 @@ bool SecureStorage::initialized = false;
 bool SecureStorage::init() {
     if (initialized) return true;
     esp_err_t err = nvs_flash_init();
-    if (err != ESP_OK && err != ESP_ERR_NVS_ALREADY_INITIALIZED) return false;
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_INITIALIZED) return false;
     err = nvs_open("secure", NVS_READWRITE, &handle);
     if (err != ESP_OK) return false;
     initialized = true;

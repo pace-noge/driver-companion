@@ -52,40 +52,52 @@ void ArrowRenderer::drawArrow(TurnType type) {
 
     switch (type) {
         case TURN_STRAIGHT: {
-            lv_canvas_draw_line(canvas, 64, 10, 64, 20, &line_dsc);
-            lv_canvas_draw_line(canvas, 59, 15, 64, 10, &line_dsc);
-            lv_canvas_draw_line(canvas, 69, 15, 64, 10, &line_dsc);
+            lv_point_t points1[2] = {{64, 10}, {64, 20}};
+            lv_point_t points2[2] = {{59, 15}, {64, 10}};
+            lv_point_t points3[2] = {{69, 15}, {64, 10}};
+            lv_canvas_draw_line(canvas, points1, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points2, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points3, 2, &line_dsc);
             break;
         }
         case TURN_RIGHT_90: {
-            lv_canvas_draw_line(canvas, 50, 20, 50, 40, &line_dsc);
-            lv_canvas_draw_line(canvas, 50, 40, 70, 40, &line_dsc);
-            lv_canvas_draw_line(canvas, 65, 35, 70, 40, &line_dsc);
-            lv_canvas_draw_line(canvas, 65, 45, 70, 40, &line_dsc);
+            lv_point_t points1[2] = {{50, 20}, {50, 40}};
+            lv_point_t points2[2] = {{50, 40}, {70, 40}};
+            lv_point_t points3[2] = {{65, 35}, {70, 40}};
+            lv_point_t points4[2] = {{65, 45}, {70, 40}};
+            lv_canvas_draw_line(canvas, points1, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points2, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points3, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points4, 2, &line_dsc);
             break;
         }
         case KEEP_RIGHT: {
-            lv_canvas_draw_line(canvas, 50, 30, 60, 30, &line_dsc);
-            lv_canvas_draw_line(canvas, 60, 30, 70, 35, &line_dsc);
-            lv_canvas_draw_line(canvas, 65, 30, 70, 35, &line_dsc);
-            lv_canvas_draw_line(canvas, 65, 40, 70, 35, &line_dsc);
+            lv_point_t points1[2] = {{50, 30}, {60, 30}};
+            lv_point_t points2[2] = {{60, 30}, {70, 35}};
+            lv_point_t points3[2] = {{65, 30}, {70, 35}};
+            lv_point_t points4[2] = {{65, 40}, {70, 35}};
+            lv_canvas_draw_line(canvas, points1, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points2, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points3, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points4, 2, &line_dsc);
             break;
         }
         case UTURN_MEDIAN: {
-            // Draw upper half circle
             for (int angle = 0; angle < 180; angle += 5) {
                 lv_canvas_draw_arc(canvas, 64, 32, 15, angle, angle + 5, &arc_dsc);
             }
-            lv_canvas_draw_line(canvas, 49, 32, 49, 40, &line_dsc);
-            lv_canvas_draw_line(canvas, 79, 32, 79, 40, &line_dsc);
+            lv_point_t points1[2] = {{49, 32}, {49, 40}};
+            lv_point_t points2[2] = {{79, 32}, {79, 40}};
+            lv_canvas_draw_line(canvas, points1, 2, &line_dsc);
+            lv_canvas_draw_line(canvas, points2, 2, &line_dsc);
             break;
         }
         case ROUNDABOUT_EXIT: {
-            // Draw full circle
             for (int angle = 0; angle < 360; angle += 10) {
                 lv_canvas_draw_arc(canvas, 64, 32, 12, angle, angle + 10, &arc_dsc);
             }
-            lv_canvas_draw_line(canvas, 64, 20, 64, 10, &line_dsc);
+            lv_point_t points[2] = {{64, 20}, {64, 10}};
+            lv_canvas_draw_line(canvas, points, 2, &line_dsc);
             break;
         }
     }
@@ -140,23 +152,4 @@ void ArrowRenderer::drawLaneIndicator(bool activeLanes[4], int count) {
     }
 }
 
-void ArrowRenderer::drawStreetName(const char* name) {
-    // Create label for street name
-    lv_obj_t* label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, name);
-    
-    // Set label position
-    int len = strlen(name);
-    if (len > 12) {
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 5, STREET_Y);
-    } else {
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 0, STREET_Y);
-    }
-    
-    // Set label style
-    static lv_style_t style;
-    lv_style_init(&style);
-    lv_style_set_text_color(&style, lv_color_white());
-    lv_style_set_text_font(&style, &lv_font_montserrat_10);
-    lv_obj_add_style(label, &style, 0);
-}
+// ...existing code...

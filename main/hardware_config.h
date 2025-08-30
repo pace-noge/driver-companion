@@ -1,8 +1,8 @@
 #ifndef HARDWARE_CONFIG_H
 #define HARDWARE_CONFIG_H
 
-#define I2C_SDA_PIN 1
-#define I2C_SCL_PIN 0
+#define I2C_SDA_PIN 4
+#define I2C_SCL_PIN 5
 #define I2C_FREQ_HZ 400000
 
 #define DISPLAY_WIDTH 128

@@ -11,4 +11,5 @@ idf_component_register(
     "ota_updater.cpp"
     "wifi_manager.cpp"
     INCLUDE_DIRS "."
+    REQUIRES bt nvs_flash json esp_https_ota
 )

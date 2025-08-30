@@ -38,6 +38,8 @@ bool DisplayManager::init() {
 
     // Add display (only supported fields)
     const lvgl_port_display_cfg_t disp_cfg = {
+        .io_handle = NULL,
+        .panel_handle = NULL,
         .buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT / 8,
         .double_buffer = false,
         .hres = DISPLAY_WIDTH,

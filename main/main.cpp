@@ -1,3 +1,14 @@
+#include <esp_idf_version.h>
+#include <stdio.h>
+#include <esp_log.h>
+static void print_startup_info() {
+    printf("\n==============================\n");
+    printf("Drive Companion Firmware Boot\n");
+    printf("Build date: %s %s\n", __DATE__, __TIME__);
+    printf("ESP-IDF Version: %s\n", esp_get_idf_version());
+    printf("==============================\n\n");
+    ESP_LOGI("STARTUP", "System startup complete");
+}
 #include "display_manager.h"
 #include "secure_storage.h"
 #include "ble_server.h"
@@ -9,6 +20,7 @@
 #include "cJSON.h"
 
 extern "C" void app_main() {
+    print_startup_info();
     // Initialize NVS
     if (!SecureStorage::init()) {
         while (true) {
@@ -17,16 +29,21 @@ extern "C" void app_main() {
     }
 
     // Initialize display
+    ESP_LOGI("DISPLAY", "Initializing display...");
     DisplayManager display;
     if (!display.init()) {
+        ESP_LOGE("DISPLAY", "Display initialization failed");
         while (true) {
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
     }
+    ESP_LOGI("DISPLAY", "Display initialized successfully");
 
     // Initialize MPU6050 sensor
+    ESP_LOGI("MPU6050", "Initializing MPU6050 sensor...");
     MPU6050Sensor mpuSensor;
     if (!mpuSensor.begin()) {
+        ESP_LOGE("MPU6050", "MPU6050 sensor initialization failed");
         lv_obj_t* label = lv_label_create(lv_scr_act());
         lv_label_set_text(label, "MPU6050 FAIL");
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
@@ -35,6 +52,7 @@ extern "C" void app_main() {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
     }
+    ESP_LOGI("MPU6050", "MPU6050 sensor initialized successfully");
 
     // Create face and arrow renderers
     FaceRenderer face(&display);
@@ -45,6 +63,7 @@ extern "C" void app_main() {
     EmotionEngine emotionEngine(&face, &mpuSensor, &stateManager);
 
     // Initialize BLE
+    ESP_LOGI("BLE", "Initializing BLE server...");
     SecureBLEServer bleServer;
     bleServer.setDataCallback([&stateManager](const char* packet, size_t len) {
         // Parse JSON and trigger navigation using cJSON
@@ -60,6 +79,7 @@ extern "C" void app_main() {
         cJSON_Delete(doc);
     });
     bleServer.begin();
+    ESP_LOGI("BLE", "BLE server initialized and advertising");
 
     // Start state and emotion engine
     stateManager.begin();

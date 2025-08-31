@@ -50,7 +50,7 @@ FaceRenderer::FaceRenderer(DisplayManager* display) : display(display) {
     canvas = lv_canvas_create(lv_scr_act());
     lv_canvas_set_buffer(canvas, cbuf, DISPLAY_WIDTH, DISPLAY_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     lv_obj_align(canvas, LV_ALIGN_CENTER, 0, 0);
-    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+    lv_canvas_fill_bg(canvas, lv_color_black());
     // Initialize eye images
     init_eye_images();
 }
@@ -98,7 +98,7 @@ void FaceRenderer::drawMouth(MouthShape shape) {
     lv_draw_rect_dsc_init(&rect_dsc);
     rect_dsc.border_color = lv_color_white();
     rect_dsc.border_width = 2;
-    rect_dsc.bg_opa = LV_OPA_TRANSP;
+    // rect_dsc.bg_opa = LV_OPA_TRANSP; // Not supported in 1-bit mode
     
     switch (shape) {
         case MOUTH_SMILE: {
@@ -145,7 +145,7 @@ void FaceRenderer::drawFace(FaceEmotion emotion) {
     display->clear();
     
     // Clear canvas with black
-    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+    lv_canvas_fill_bg(canvas, lv_color_black());
 
     EyeState leftEye = EYE_OPEN;
     EyeState rightEye = EYE_OPEN;

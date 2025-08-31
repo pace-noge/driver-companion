@@ -10,7 +10,7 @@ ArrowRenderer::ArrowRenderer(DisplayManager* display) : display(display) {
     canvas = lv_canvas_create(lv_scr_act());
     lv_canvas_set_buffer(canvas, cbuf, DISPLAY_WIDTH, DISPLAY_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     lv_obj_align(canvas, LV_ALIGN_CENTER, 0, 0);
-    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+    lv_canvas_fill_bg(canvas, lv_color_black());
 }
 
 void ArrowRenderer::drawStreetName(const char* name) {
@@ -37,7 +37,7 @@ void ArrowRenderer::drawArrow(TurnType type) {
     display->clear();
     
     // Clear canvas with black
-    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
+    lv_canvas_fill_bg(canvas, lv_color_black());
     
     // Initialize drawing descriptors
     lv_draw_line_dsc_t line_dsc;
